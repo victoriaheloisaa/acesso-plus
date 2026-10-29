@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light" data-font="standard" data-spacing="normal" data-text-size="normal">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACESSO+ | Aprender sem barreiras</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS Customizado -->
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-surface: #ffffff;
+            --color-text: #1e293b;
+            --color-text-muted: #64748b;
+            --color-primary: #1e3a8a;
+            --color-primary-hover: #172554;
+            --color-accent: #3b82f6;
+            --color-border: #e2e8f0;
+            --color-success: #10b981;
+            
+            --font-family: 'Inter', sans-serif;
+            --line-height: 1.6;
+        }
+
+        [data-theme="dark"] {
+            --color-bg: #0f172a;
+            --color-surface: #1e293b;
+            --color-text: #f1f5f9;
+            --color-text-muted: #94a3b8;
+            --color-primary: #60a5fa;
+            --color-primary-hover: #93c5fd;
+            --color-accent: #3b82f6;
+            --color-border: #334155;
+        }
+
+        [data-theme="hc"] {
+            --color-bg: #000000;
+            --color-surface: #000000;
+            --color-text: #ffff00;
+            --color-text-muted: #ffffff;
+            --color-primary: #ffff00;
+            --color-primary-hover: #ffffff;
+            --color-accent: #ffff00;
+            --color-border: #ffff00;
+        }
+
+        [data-font="dyslexia"] { --font-family: 'Lexend', sans-serif; }
+        [data-spacing="wide"] { --line-height: 1.8; letter-spacing: 0.05em; }
+        html[data-text-size="small"] { font-size: 14px; }
+        html[data-text-size="normal"] { font-size: 16px; }
+        html[data-text-size="large"] { font-size: 20px; }
+        html[data-text-size="xlarge"] { font-size: 24px; }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: var(--font-family);
+            line-height: var(--line-height);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .bg-surface { background-color: var(--color-surface); }
+        .text-main { color: var(--color-text); }
+        .text-muted { color: var(--color-text-muted); }
+        .bg-primary { background-color: var(--color-primary); color: #fff; }
+        .bg-primary:hover { background-color: var(--color-primary-hover); }
+        .text-primary { color: var(--color-primary); }
+        .border-theme { border-color: var(--color-border); }
+        
+        [data-theme="hc"] .bg-primary { background-color: transparent; border: 2px solid var(--color-primary); color: var(--color-primary); }
+        [data-theme="hc"] .bg-primary:hover { background-color: var(--color-primary); color: #000; }
+        
+        *:focus-visible { outline: 3px solid var(--color-accent); outline-offset: 2px; }
+
+        #heatmap-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; display: none; opacity: 0.85; }
+        .hidden-ab { display: none !important; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--color-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+        
+        /* Success Animation */
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <canvas id="heatmap-canvas"></canvas>
+
+    <!-- Menu Lateral -->
+    <nav class="w-20 md:w-64 bg-surface border-r border-theme flex flex-col justify-between transition-all duration-300 z-40 relative shadow-sm" aria-label="Menu Principal">
+        <div>
+            <div class="h-16 flex items-center justify-center md:justify-start md:px-6 border-b border-theme">
+                <i class="fa-solid fa-graduation-cap text-primary text-2xl"></i>
+                <span class="hidden md:block ml-3 font-bold text-xl text-main">ACESSO+</span>
+            </div>
+            <ul class="flex flex-col mt-4 space-y-2 px-2 md:px-4">
+                <li><button onclick="navTo('dashboard')" class="nav-btn w-full flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-main"><i class="fa-solid fa-house w-6 text-center"></i><span class="hidden md:block ml-3 font-medium">Início</span></button></li>
+                <li><button onclick="navTo('study')" class="nav-btn w-full flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-main"><i class="fa-solid fa-book-open w-6 text-center"></i><span class="hidden md:block ml-3 font-medium">Estudar</span></button></li>
+                <li><button onclick="navTo('tasks')" class="nav-btn w-full flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-main"><i class="fa-solid fa-list-check w-6 text-center"></i><span class="hidden md:block ml-3 font-medium">Tarefas</span></button></li>
+                <li><button onclick="navTo('settings')" class="nav-btn w-full flex items-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-main"><i class="fa-solid fa-gear w-6 text-center"></i><span class="hidden md:block ml-3 font-medium">Ajustes & IHC</span></button></li>
+            </ul>
+        </div>
+        <div class="p-4 border-t border-theme">
+            <button onclick="toggleA11yPanel()" class="w-full flex items-center justify-center md:justify-start p-3 rounded-lg bg-primary shadow-md hover:-translate-y-1 transition-transform">
+                <i class="fa-solid fa-universal-access text-xl text-white"></i>
+                <span class="hidden md:block ml-3 font-bold text-white">Acessibilidade</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Área de Conteúdo -->
+    <main class="flex-1 h-full overflow-y-auto relative bg-bg" id="main-content">
+        
+        <!-- DASHBOARD (Com Teste A/B) -->
+        <section id="view-dashboard" class="p-6 md:p-10 max-w-6xl mx-auto hidden">
+            <div id="dashboard-container">
+                <!-- VERSÃO A (Carga Cognitiva Alta) -->
+                <div id="dashboard-version-a" class="hidden-ab">
+                    <header class="mb-8 flex justify-between items-center">
+                        <div>
+                            <h1 class="text-3xl font-bold text-main">Painel Geral de Controle</h1>
+                            <p class="text-muted text-sm mt-1">Métricas, tabelas e excesso de alertas visuais (UI Poluída).</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-bold">3 Alertas</span>
+                        </div>
+                    </header>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-surface p-4 border border-theme shadow-sm"><h3 class="text-sm font-bold text-muted uppercase">Progresso</h3><div class="text-2xl font-black text-main mt-2">42%</div><div class="w-full bg-gray-200 h-2 mt-2"><div class="bg-blue-500 h-2 w-[42%]"></div></div></div>
+                        <div class="bg-surface p-4 border border-theme shadow-sm"><h3 class="text-sm font-bold text-muted uppercase">Horas</h3><div class="text-2xl font-black text-main mt-2">14h 30m</div></div>
+                        <div class="bg-surface p-4 border border-theme shadow-sm"><h3 class="text-sm font-bold text-muted uppercase">Tarefas</h3><div class="text-2xl font-black text-main mt-2">12/28</div></div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-surface p-4 border border-theme shadow-sm">
+                            <h3 class="font-bold border-b border-theme pb-2 mb-4 text-main">Atividades e Fórum (Muito texto)</h3>
+                            <ul class="space-y-3 text-sm text-main">
+                                <li><i class="fa-solid fa-comment text-gray-400 mr-2"></i> Zé Almeida respondeu seu dashboard.</li>
+                                <li><i class="fa-solid fa-file-pdf text-red-400 mr-2"></i> Material "Heurísticas" atualizado.</li>
+                                <li><i class="fa-solid fa-envelope text-gray-400 mr-2"></i> Lembrete: PL/SQL review às 14h.</li>
+                                <li><i class="fa-solid fa-bullhorn text-yellow-500 mr-2"></i> Coordenação Fatec: Feriado na sexta.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-surface p-4 border border-theme shadow-sm">
+                            <h3 class="font-bold border-b border-theme pb-2 mb-4 text-main">Lista Completa de Cursos</h3>
+                            <div class="space-y-4">
+                                <div><div class="flex justify-between text-sm mb-1 text-main"><span>UX Design</span><span>30%</span></div><div class="w-full bg-gray-200 h-1"><div class="bg-green-500 h-1 w-[30%]"></div></div></div>
+                                <div><div class="flex justify-between text-sm mb-1 text-main"><span>Acessibilidade Web</span><span>65%</span></div><div class="w-full bg-gray-200 h-1"><div class="bg-green-500 h-1 w-[65%]"></div></div></div>
+                                <div><div class="flex justify-between text-sm mb-1 text-main"><span>IHC & Métricas</span><span>10%</span></div><div class="w-full bg-gray-200 h-1"><div class="bg-green-500 h-1 w-[10%]"></div></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VERSÃO B (Clean / Baixa Carga Cognitiva) -->
+                <div id="dashboard-version-b" class="hidden-ab">
+                    <header class="mb-10 mt-4">
+                        <h1 class="text-4xl font-bold text-main mb-2">Olá, <span id="dash-name">Estudante</span>! 👋</h1>
+                        <p class="text-xl text-muted">Pronto para continuar desenvolvendo suas skills hoje?</p>
+                    </header>
+                    <div class="bg-surface rounded-2xl p-8 border border-theme shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-6 border-l-4 border-l-blue-500">
+                        <div class="flex-1 w-full">
+                            <h2 class="text-lg font-semibold text-muted mb-1">Seu foco atual:</h2>
+                            <h3 class="text-2xl font-bold text-main mb-4">Acessibilidade Web (WCAG) - Módulo 2</h3>
+                            <div class="flex items-center gap-4">
+                                <div class="flex-1 bg-gray-200 rounded-full h-4 overflow-hidden"><div class="bg-blue-600 h-4 rounded-full" style="width: 65%;"></div></div>
+                                <span class="font-bold text-main">65% concluído</span>
+                            </div>
+                        </div>
+                        <button onclick="navTo('study')" class="bg-primary text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:-translate-y-1 transition-all w-full md:w-auto text-center">
+                            Continuar Estudo <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-surface p-6 rounded-2xl border border-theme flex items-start gap-4 shadow-sm cursor-pointer hover:border-blue-400 transition-colors" onclick="navTo('tasks')">
+                            <div class="p-4 bg-purple-100 text-purple-700 rounded-full"><i class="fa-solid fa-list-check text-2xl"></i></div>
+                            <div>
+                                <h3 class="font-bold text-lg text-main mb-1"><span id="dash-task-count">0</span> Tarefas Pendentes</h3>
+                                <p class="text-muted text-sm">Organize suas entregas de front-end e UX.</p>
+                            </div>
+                        </div>
+                        <div class="bg-surface p-6 rounded-2xl border border-theme flex items-start gap-4 shadow-sm">
+                            <div class="p-4 bg-blue-100 text-blue-700 rounded-full"><i class="fa-solid fa-users text-2xl"></i></div>
+                            <div>
+                                <h3 class="font-bold text-lg text-main mb-1">Grupo de Estudos</h3>
+                                <p class="text-muted text-sm">Apresentação de IHC na Fatec próxima semana.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SALA DE ESTUDOS -->
+        <section id="view-study" class="p-6 md:p-10 max-w-4xl mx-auto hidden pb-24">
+            <nav class="mb-6 flex items-center text-sm text-muted font-medium">
+                <button onclick="navTo('dashboard')" class="hover:text-primary transition-colors">Início</button>
+                <i class="fa-solid fa-chevron-right mx-2 text-xs"></i>
+                <span>Acessibilidade Web (WCAG)</span>
+                <i class="fa-solid fa-chevron-right mx-2 text-xs"></i>
+                <span class="text-main font-bold">Módulo 2: Percepção</span>
+            </nav>
+
+            <article class="bg-surface rounded-2xl p-6 md:p-10 border border-theme shadow-sm mb-6">
+                <header class="mb-8 border-b border-theme pb-6 flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-bold text-main mb-2">Princípio 1: Perceptível</h1>
+                        <p class="text-muted text-lg">As informações da interface devem ser apresentadas de forma que todos possam percebê-las (Visão, Audição, Toque).</p>
+                    </div>
+                    <div class="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-2 border border-theme shadow-sm shrink-0">
+                        <button onclick="readAloud()" class="p-3 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-main transition-colors" title="Ouvir"><i class="fa-solid fa-play"></i></button>
+                        <button onclick="pauseSpeech()" class="p-3 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-main transition-colors" title="Pausar"><i class="fa-solid fa-pause"></i></button>
+                        <button onclick="stopSpeech()" class="p-3 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-main transition-colors" title="Parar"><i class="fa-solid fa-stop"></i></button>
+                    </div>
+                </header>
+
+                <div class="prose max-w-none text-main space-y-6" id="study-content">
+                    <p>O primeiro princípio do WCAG garante que o conteúdo não seja "invisível" para nenhum dos sentidos do usuário. Pense nas <strong>Heurísticas de Nielsen</strong>: o sistema precisa manter o usuário informado, e isso só é possível se ele consegue <em>perceber</em> a informação.</p>
+                    
+                    <h2 class="text-2xl font-bold mt-8 mb-4">Diretrizes Principais</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>Alternativas em Texto (1.1):</strong> Tudo que não for texto (imagens gráficos no Power BI, ícones) deve ter uma alternativa descritiva (`alt`).</li>
+                        <li><strong>Mídia Baseada em Tempo (1.2):</strong> Forneça legendas, transcrições ou audiodescrição para vídeos e áudios.</li>
+                        <li><strong>Adaptável (1.3):</strong> Crie conteúdo que possa ser apresentado de diferentes formas (ex: layout simplificado) sem perder a informação ou estrutura. Uso correto de tags semânticas no HTML.</li>
+                        <li><strong>Distinguível (1.4):</strong> Facilite a visualização e audição. O contraste de cor deve ser no mínimo 4.5:1 (relação com cores de marca, ex: azul petróleo e branco).</li>
+                    </ul>
+
+                    <div class="bg-blue-50 dark:bg-blue-900/30 p-6 rounded-xl border border-blue-200 dark:border-blue-800 my-6">
+                        <h3 class="font-bold flex items-center mb-2"><i class="fa-solid fa-code text-blue-500 mr-2"></i> Aplicação em Next.js / React</h3>
+                        <p class="text-sm">Ao desenvolver componentes, evite usar apenas cores para transmitir status de erro. Utilize ícones + texto descritivo e a tag <code>aria-live="polite"</code> para leitores de tela.</p>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Quiz Interativo para liberar avanço -->
+            <div class="bg-surface rounded-2xl p-6 md:p-8 border border-theme shadow-sm" id="quiz-section">
+                <h3 class="text-xl font-bold text-main mb-4 flex items-center"><i class="fa-solid fa-clipboard-question text-purple-500 mr-2"></i> Validação de Conhecimento</h3>
+                <p class="text-muted mb-6">Responda corretamente para concluir o módulo e calcular seu progresso.</p>
+                
+                <form id="quiz-form" onsubmit="validateQuiz(event)">
+                    <div class="mb-6">
+                        <p class="font-bold text-main mb-3">1. Qual a função principal do atributo 'alt' em uma tag de imagem?</p>
+                        <div class="space-y-2">
+                            <label class="flex items-center p-3 border border-theme rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                                <input type="radio" name="q1" value="wrong" class="mr-3 w-4 h-4 text-blue-600"> Melhorar a qualidade visual da imagem.
+                            </label>
+                            <label class="flex items-center p-3 border border-theme rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                                <input type="radio" name="q1" value="correct" class="mr-3 w-4 h-4 text-blue-600" required> Fornecer uma alternativa textual para leitores de tela.
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="quiz-feedback" class="hidden mb-4 p-4 rounded-lg font-bold"></div>
+
+                    <div class="flex justify-between items-center border-t border-theme pt-6">
+                        <button type="button" class="px-6 py-3 rounded-lg font-bold text-main bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"><i class="fa-solid fa-arrow-left mr-2"></i> Voltar</button>
+                        <button type="submit" id="btn-avancar" class="px-6 py-3 rounded-lg font-bold text-white bg-primary hover:-translate-y-1 transition-all shadow-md">Concluir e Avançar <i class="fa-solid fa-check ml-2"></i></button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- TELA DE SUCESSO -->
+        <section id="view-success" class="p-6 md:p-10 max-w-3xl mx-auto hidden h-full flex flex-col items-center justify-center text-center animate-pop">
+            <div class="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-5xl mb-6 shadow-lg border-4 border-green-500">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h1 class="text-4xl font-black text-main mb-4">Módulo Concluído!</h1>
+            <p class="text-xl text-muted mb-8">Você dominou o Princípio da Percepção e ganhou <span class="font-bold text-green-500">+150 XP</span>.</p>
+            
+            <div class="bg-surface p-6 border border-theme rounded-xl shadow-sm w-full max-w-md mb-8 text-left">
+                <h3 class="font-bold text-muted text-sm uppercase mb-2">Próximo Passo</h3>
+                <h2 class="text-2xl font-bold text-main mb-2">Módulo 3: Operável</h2>
+                <p class="text-muted text-sm">Garantir que a interface do usuário possa ser operada via teclado e sem armadilhas.</p>
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="navTo('dashboard')" class="px-6 py-3 rounded-xl font-bold text-main bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 transition-colors">Voltar ao Início</button>
+                <button onclick="navTo('dashboard')" class="px-6 py-3 rounded-xl font-bold text-white bg-primary hover:bg-primary-hover shadow-lg hover:-translate-y-1 transition-all">Iniciar Módulo 3 <i class="fa-solid fa-arrow-right ml-2"></i></button>
+            </div>
+        </section>
+
+        <!-- GERENCIADOR DE TAREFAS -->
+        <section id="view-tasks" class="p-6 md:p-10 max-w-3xl mx-auto hidden">
+            <header class="mb-8">
+                <h1 class="text-3xl font-bold text-main mb-2">Kanban & Tarefas</h1>
+                <p class="text-muted">Gestão de pendências da Fatec, Projetos Web e BI.</p>
+            </header>
+
+            <div class="bg-surface rounded-2xl p-6 md:p-8 border border-theme shadow-sm mb-8">
+                <form id="task-form" class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <input type="text" id="task-input" placeholder="Ex: Finalizar dashboard no Power BI..." class="w-full p-4 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-main focus:ring-4 focus:ring-blue-500 focus:outline-none transition-shadow text-lg" required>
+                    </div>
+                    <button type="submit" class="bg-primary text-white px-8 py-4 rounded-xl font-bold shadow-md hover:-translate-y-1 transition-transform flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-plus mr-2"></i> Adicionar
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-surface rounded-2xl border border-theme shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-theme bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
+                    <h2 class="font-bold text-main">Backlog Ativo</h2>
+                    <span id="task-counter" class="text-sm font-semibold bg-gray-200 dark:bg-gray-700 text-main px-3 py-1 rounded-full">0 pendentes</span>
+                </div>
+                <ul id="task-list" class="divide-y divide-gray-200 dark:divide-gray-700"></ul>
+                <div id="empty-state" class="p-10 text-center text-muted hidden">
+                    <i class="fa-solid fa-clipboard-check text-4xl mb-3 text-gray-300"></i>
+                    <p class="font-medium text-lg">Tudo em dia!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONFIGURAÇÕES E IHC (Pesquisa) -->
+        <section id="view-settings" class="p-6 md:p-10 max-w-5xl mx-auto hidden pb-20">
+            <header class="mb-8">
+                <h1 class="text-3xl font-bold text-main mb-2">Ajustes & Painel IHC</h1>
+                <p class="text-muted">Edite seu perfil e analise métricas de experiência do usuário.</p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Perfil (Editável) -->
+                <div class="bg-surface rounded-2xl p-6 border border-theme shadow-sm h-fit">
+                    <h2 class="text-xl font-bold text-main border-b border-theme pb-3 mb-6 flex items-center">
+                        <i class="fa-solid fa-user-pen mr-2 text-primary"></i> Seu Perfil
+                    </h2>
+                    
+                    <!-- View Mode -->
+                    <div id="profile-view" class="flex flex-col items-center md:items-start text-center md:text-left">
+                        <div class="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6 mb-6 w-full">
+                            <div id="profile-avatar" class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-md">
+                                VH
+                            </div>
+                            <div class="flex-1">
+                                <h3 id="display-name" class="font-black text-2xl text-main">Victória Heloísa</h3>
+                                <p id="display-email" class="text-muted">victoria@fatec.edu.br</p>
+                                <p class="text-xs font-bold text-purple-500 mt-1 uppercase tracking-wider">Desenvolvedora UI/UX</p>
+                            </div>
+                        </div>
+                        <button onclick="toggleProfileEdit()" class="w-full py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-main font-bold rounded-xl transition-colors">
+                            Editar Informações
+                        </button>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <form id="profile-edit" class="hidden space-y-4" onsubmit="saveProfile(event)">
+                        <div>
+                            <label class="block text-sm font-bold text-main mb-1">Nome Completo</label>
+                            <input type="text" id="input-name" class="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-main focus:ring-2 focus:ring-blue-500 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-main mb-1">E-mail Profissional/Estudante</label>
+                            <input type="email" id="input-email" class="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-main focus:ring-2 focus:ring-blue-500 outline-none" required>
+                        </div>
+                        <div class="flex gap-2 pt-2">
+                            <button type="button" onclick="toggleProfileEdit()" class="flex-1 py-3 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 font-bold rounded-lg">Cancelar</button>
+                            <button type="submit" class="flex-1 py-3 bg-primary text-white font-bold rounded-lg shadow-md">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Painel IHC / Heatmap / Métricas -->
+                <div class="bg-surface rounded-2xl p-6 border border-theme shadow-sm border-l-4 border-l-purple-500">
+                    <h2 class="text-xl font-bold text-main border-b border-theme pb-3 mb-4 flex items-center">
+                        <i class="fa-solid fa-chart-pie mr-2 text-purple-500"></i> Métricas de UX (Heatmap)
+                    </h2>
+                    <p class="text-sm text-muted mb-6">Avaliação de interface (A/B Test) baseada em densidade de cliques e esforço cognitivo.</p>
+                    
+                    <div class="space-y-4 mb-6">
+                        <!-- A/B Toggle -->
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                                <p class="font-bold text-main">Teste A/B: Interface Atual</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="ab-toggle" class="sr-only peer" onchange="toggleABTest()">
+                                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                <span class="ml-3 text-sm font-bold text-main" id="ab-label">Versão B</span>
+                            </label>
+                        </div>
+
+                        <!-- Métricas em Tempo Real -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900 rounded-lg text-center">
+                                <p class="text-xs font-bold text-red-600 dark:text-red-400 uppercase">Cliques (Versão A)</p>
+                                <p id="metric-clicks-a" class="text-2xl font-black text-main mt-1">0</p>
+                            </div>
+                            <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900 rounded-lg text-center">
+                                <p class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase">Cliques (Versão B)</p>
+                                <p id="metric-clicks-b" class="text-2xl font-black text-main mt-1">0</p>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p class="text-xs font-bold text-muted uppercase mb-1">CES Estimado (Customer Effort Score)</p>
+                            <p id="metric-ces" class="text-sm font-medium text-main">Analisando dados... Interaja com as telas para calcular.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button id="heatmap-toggle-btn" onclick="toggleHeatmap()" class="flex-1 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-main font-bold py-3 px-4 rounded-xl transition-colors">
+                            <i class="fa-solid fa-fire mr-1"></i> Mostrar Heatmap
+                        </button>
+                        <button onclick="clearHeatmap()" class="bg-red-100 text-red-600 hover:bg-red-200 font-bold py-3 px-4 rounded-xl transition-colors" title="Zerar Métricas">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- PAINEL DE ACESSIBILIDADE (Mantido igual, mas polido) -->
+    <div id="a11y-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-end opacity-0 pointer-events-none transition-opacity duration-300" aria-hidden="true" role="dialog">
+        <div class="bg-surface w-full md:w-96 h-full shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col" id="a11y-panel">
+            <header class="p-6 border-b border-theme flex justify-between items-center bg-primary text-white">
+                <h2 class="text-xl font-bold flex items-center"><i class="fa-solid fa-universal-access mr-3"></i> Acessibilidade</h2>
+                <button onclick="toggleA11yPanel()" class="text-white hover:text-gray-300 p-1"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            </header>
+            <div class="p-6 flex-1 overflow-y-auto space-y-8">
+                <!-- Theme/Contrast -->
+                <fieldset>
+                    <legend class="font-bold text-main mb-3 flex items-center"><i class="fa-solid fa-circle-half-stroke w-6"></i> Contraste</legend>
+                    <div class="flex flex-col space-y-2">
+                        <button onclick="setPref('theme', 'light')" class="pref-btn theme-btn text-left px-4 py-3 border rounded-xl font-medium hover:bg-gray-100 dark:hover:bg-gray-800 text-main border-theme flex justify-between"><span>Claro (Padrão)</span><span class="w-4 h-4 rounded-full bg-white border border-gray-400"></span></button>
+                        <button onclick="setPref('theme', 'dark')" class="pref-btn theme-btn text-left px-4 py-3 border rounded-xl font-medium hover:bg-gray-100 dark:hover:bg-gray-800 text-main border-theme flex justify-between"><span>Modo Escuro</span><span class="w-4 h-4 rounded-full bg-gray-800 border border-gray-400"></span></button>
+                        <button onclick="setPref('theme', 'hc')" class="pref-btn theme-btn text-left px-4 py-3 border rounded-xl font-medium hover:bg-gray-100 dark:hover:bg-gray-800 text-main border-theme flex justify-between"><span>Alto Contraste</span><span class="w-4 h-4 rounded-full bg-black border-2 border-yellow-400"></span></button>
+                    </div>
+                </fieldset>
+                <!-- Typography -->
+                <fieldset>
+                    <legend class="font-bold text-main mb-3 flex items-center"><i class="fa-solid fa-font w-6"></i> Fonte e Tamanho</legend>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <button onclick="setPref('font', 'standard')" class="pref-btn font-btn py-2 border rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-800 text-main border-theme" style="font-family: 'Inter', sans-serif;">Padrão</button>
+                        <button onclick="setPref('font', 'dyslexia')" class="pref-btn font-btn py-2 border rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-800 text-main border-theme" style="font-family: 'Lexend', sans-serif;">Dislexia</button>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="setPref('textSize', 'small')" class="pref-btn text-size-btn py-2 border rounded-lg font-medium text-sm text-main border-theme">A-</button>
+                        <button onclick="setPref('textSize', 'normal')" class="pref-btn text-size-btn py-2 border rounded-lg font-medium text-main border-theme">A</button>
+                        <button onclick="setPref('textSize', 'large')" class="pref-btn text-size-btn py-2 border rounded-lg font-medium text-lg text-main border-theme">A+</button>
+                        <button onclick="setPref('textSize', 'xlarge')" class="pref-btn text-size-btn py-2 border rounded-lg font-medium text-xl text-main border-theme">A++</button>
+                    </div>
+                </fieldset>
+                <div class="pt-4 border-t border-theme text-center">
+                    <button onclick="resetA11y()" class="text-sm text-primary font-bold hover:underline">Redefinir Padrões</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // ==========================================
+        // STATE MANAGEMENT
+        // ==========================================
+        const state = {
+            view: 'dashboard',
+            abVersion: 'B',
+            user: { name: "Victória Heloísa", email: "victoria@fatec.edu.br" }, // Perfil inicial sugerido
+            prefs: { theme: 'light', textSize: 'normal', font: 'standard', spacing: 'normal', motion: 'normal' },
+            tasks: [
+                { id: 1, title: 'Revisar Heurísticas de Nielsen', completed: true },
+                { id: 2, title: 'Testar dashboard no Power BI', completed: false },
+                { id: 3, title: 'Responder Quiz de Acessibilidade', completed: false }
+            ],
+            metrics: { clicksA: 0, clicksB: 0 },
+            heatmapActive: false,
+            clicks: []
+        };
+
+        function loadState() {
+            try {
+                if (localStorage.getItem('aPlus_prefs')) state.prefs = JSON.parse(localStorage.getItem('aPlus_prefs'));
+                if (localStorage.getItem('aPlus_tasks')) state.tasks = JSON.parse(localStorage.getItem('aPlus_tasks'));
+                if (localStorage.getItem('aPlus_ab')) state.abVersion = localStorage.getItem('aPlus_ab');
+                if (localStorage.getItem('aPlus_user')) state.user = JSON.parse(localStorage.getItem('aPlus_user'));
+                if (localStorage.getItem('aPlus_metrics')) state.metrics = JSON.parse(localStorage.getItem('aPlus_metrics'));
+            } catch (e) { console.error('Error loading state', e); }
+        }
+
+        function saveState(key, data) {
+            localStorage.setItem(`aPlus_${key}`, typeof data === 'string' ? data : JSON.stringify(data));
+        }
+
+        // ==========================================
+        // PROFILE LOGIC
+        // ==========================================
+        function updateProfileUI() {
+            document.getElementById('display-name').textContent = state.user.name;
+            document.getElementById('display-email').textContent = state.user.email;
+            document.getElementById('dash-name').textContent = state.user.name.split(' ')[0];
+            
+            // Generate Avatar initials
+            const initials = state.user.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+            document.getElementById('profile-avatar').textContent = initials;
+        }
+
+        function toggleProfileEdit() {
+            const view = document.getElementById('profile-view');
+            const edit = document.getElementById('profile-edit');
+            if (edit.classList.contains('hidden')) {
+                document.getElementById('input-name').value = state.user.name;
+                document.getElementById('input-email').value = state.user.email;
+                view.classList.add('hidden');
+                edit.classList.remove('hidden');
+            } else {
+                view.classList.remove('hidden');
+                edit.classList.add('hidden');
+            }
+        }
+
+        function saveProfile(e) {
+            e.preventDefault();
+            state.user.name = document.getElementById('input-name').value;
+            state.user.email = document.getElementById('input-email').value;
+            saveState('user', state.user);
+            updateProfileUI();
+            toggleProfileEdit();
+        }
+
+        // ==========================================
+        // NAVIGATION
+        // ==========================================
+        function navTo(viewId) {
+            stopSpeech();
+            document.querySelectorAll('section[id^="view-"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-gray-100', 'dark:bg-gray-800', 'border-l-4', 'border-primary');
+            });
+            const activeBtn = document.querySelector(`button[onclick="navTo('${viewId}')"]`);
+            if (activeBtn) activeBtn.classList.add('bg-gray-100', 'dark:bg-gray-800', 'border-l-4', 'border-primary');
+
+            state.view = viewId;
+            if(viewId === 'tasks') renderTasks();
+            if(viewId === 'dashboard') applyABTest();
+            if(viewId === 'settings') updateMetricsUI();
+            
+            document.getElementById('main-content').scrollTop = 0;
+        }
+
+        // ==========================================
+        // QUIZ & PROGRESSION
+        // ==========================================
+        function validateQuiz(e) {
+            e.preventDefault();
+            const form = e.target;
+            const answer = form.q1.value;
+            const feedback = document.getElementById('quiz-feedback');
+            
+            feedback.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            
+            if (answer === 'correct') {
+                feedback.textContent = "✅ Resposta Correta! O atributo 'alt' é fundamental para tecnologia assistiva.";
+                feedback.classList.add('bg-green-100', 'text-green-700');
+                setTimeout(() => navTo('success'), 1500); // Avança automaticamente após sucesso
+                
+                // Marca tarefa como concluída se existir
+                const quizTask = state.tasks.find(t => t.title.includes('Quiz'));
+                if(quizTask) { quizTask.completed = true; saveState('tasks', state.tasks); }
+            } else {
+                feedback.textContent = "❌ Resposta Incorreta. Tente ler a seção de 'Alternativas em Texto' novamente.";
+                feedback.classList.add('bg-red-100', 'text-red-700');
+            }
+        }
+
+        // ==========================================
+        // HEATMAP & UX METRICS (IHC)
+        // ==========================================
+        const canvas = document.getElementById('heatmap-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if(state.heatmapActive) drawHeatmap();
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        document.addEventListener('click', (e) => {
+            if(e.target.closest('#heatmap-toggle-btn') || e.target.closest('#a11y-modal')) return;
+            
+            // Track clicks for A/B testing on Dashboard
+            if(state.view === 'dashboard') {
+                if(state.abVersion === 'A') state.metrics.clicksA++;
+                else state.metrics.clicksB++;
+                saveState('metrics', state.metrics);
+                if(document.getElementById('view-settings').classList.contains('hidden') === false) updateMetricsUI();
+            }
+
+            state.clicks.push({ x: e.clientX, y: e.clientY });
+            if(state.clicks.length > 500) state.clicks.shift(); // Evitar memory leak
+            if(state.heatmapActive) drawHeatmap();
+        });
+
+        function updateMetricsUI() {
+            document.getElementById('metric-clicks-a').textContent = state.metrics.clicksA;
+            document.getElementById('metric-clicks-b').textContent = state.metrics.clicksB;
+            
+            const cesEl = document.getElementById('metric-ces');
+            if(state.metrics.clicksA === 0 && state.metrics.clicksB === 0) {
+                cesEl.textContent = "Aguardando interação no Dashboard...";
+                cesEl.className = "text-sm font-medium text-muted";
+            } else if (state.metrics.clicksA > state.metrics.clicksB * 1.5) {
+                cesEl.textContent = "A Versão B exige muito menos esforço cognitivo e cliques que a A. Excelente Usabilidade!";
+                cesEl.className = "text-sm font-bold text-green-600 dark:text-green-400";
+            } else if (state.metrics.clicksB > state.metrics.clicksA) {
+                cesEl.textContent = "A Versão B está gerando mais cliques que a A. Revise o design.";
+                cesEl.className = "text-sm font-bold text-red-600 dark:text-red-400";
+            } else {
+                cesEl.textContent = "Dados coletados suficientes para análise estatística inicial.";
+                cesEl.className = "text-sm font-bold text-blue-600 dark:text-blue-400";
+            }
+        }
+
+        function toggleHeatmap() {
+            state.heatmapActive = !state.heatmapActive;
+            const btn = document.getElementById('heatmap-toggle-btn');
+            
+            if (state.heatmapActive) {
+                canvas.style.display = 'block';
+                btn.innerHTML = '<i class="fa-solid fa-eye-slash mr-1"></i> Ocultar Heatmap';
+                btn.classList.replace('bg-gray-200', 'bg-purple-600');
+                btn.classList.replace('text-main', 'text-white');
+                resizeCanvas();
+                drawHeatmap();
+            } else {
+                canvas.style.display = 'none';
+                btn.innerHTML = '<i class="fa-solid fa-fire mr-1"></i> Mostrar Heatmap';
+                btn.classList.replace('bg-purple-600', 'bg-gray-200');
+                btn.classList.replace('text-white', 'text-main');
+            }
+        }
+
+        function clearHeatmap() {
+            state.clicks = [];
+            state.metrics = { clicksA: 0, clicksB: 0 };
+            saveState('metrics', state.metrics);
+            updateMetricsUI();
+            if(state.heatmapActive) ctx.clearRect(0, 0, canvas.width, canvas.height);
+            alert("Métricas de IHC apagadas.");
+        }
+
+        function drawHeatmap() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(0,0,15,0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const radius = 45;
+            state.clicks.forEach(point => {
+                const gradient = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius);
+                gradient.addColorStop(0, 'rgba(255, 0, 50, 0.8)');
+                gradient.addColorStop(0.4, 'rgba(255, 200, 0, 0.5)');
+                gradient.addColorStop(1, 'rgba(0, 0, 255, 0)');
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            });
+        }
+
+        // ==========================================
+        // TASKS, A/B TEST & A11Y LOGIC (Mantidos e polidos)
+        // ==========================================
+        function toggleABTest() {
+            const toggle = document.getElementById('ab-toggle');
+            state.abVersion = toggle.checked ? 'B' : 'A';
+            saveState('ab', state.abVersion);
+            applyABTest();
+        }
+
+        function applyABTest() {
+            const verA = document.getElementById('dashboard-version-a');
+            const verB = document.getElementById('dashboard-version-b');
+            const toggle = document.getElementById('ab-toggle');
+            if(!toggle) return;
+
+            if(state.abVersion === 'A') {
+                verA.classList.remove('hidden-ab'); verB.classList.add('hidden-ab');
+                toggle.checked = false;
+            } else {
+                verA.classList.add('hidden-ab'); verB.classList.remove('hidden-ab');
+                toggle.checked = true;
+            }
+        }
+
+        const taskForm = document.getElementById('task-form');
+        const taskInput = document.getElementById('task-input');
+        const taskList = document.getElementById('task-list');
+        
+        taskForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = taskInput.value.trim();
+            if(title) {
+                state.tasks.push({ id: Date.now(), title, completed: false });
+                saveState('tasks', state.tasks);
+                taskInput.value = '';
+                renderTasks();
+            }
+        });
+
+        function toggleTask(id) {
+            const task = state.tasks.find(t => t.id === id);
+            if(task) { task.completed = !task.completed; saveState('tasks', state.tasks); renderTasks(); }
+        }
+
+        function deleteTask(id) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            saveState('tasks', state.tasks); renderTasks();
+        }
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            let pending = 0;
+            if (state.tasks.length === 0) {
+                taskList.classList.add('hidden'); document.getElementById('empty-state').classList.remove('hidden');
+            } else {
+                taskList.classList.remove('hidden'); document.getElementById('empty-state').classList.add('hidden');
+                state.tasks.forEach(task => {
+                    if(!task.completed) pending++;
+                    const li = document.createElement('li');
+                    li.className = `p-4 flex items-center justify-between transition-colors ${task.completed ? 'bg-gray-50 dark:bg-gray-800/50 opacity-60' : 'bg-surface hover:bg-gray-50 dark:hover:bg-gray-800'}`;
+                    li.innerHTML = `
+                        <div class="flex items-center flex-1 cursor-pointer" onclick="toggleTask(${task.id})">
+                            <div class="w-6 h-6 rounded border-2 flex items-center justify-center mr-4 ${task.completed ? 'bg-green-500 border-green-500' : 'border-gray-400'}">
+                                ${task.completed ? '<i class="fa-solid fa-check text-white text-sm"></i>' : ''}
+                            </div>
+                            <span class="text-lg font-medium ${task.completed ? 'line-through text-muted' : 'text-main'}">${task.title}</span>
+                        </div>
+                        <button onclick="deleteTask(${task.id})" class="text-red-500 hover:text-red-700 p-2"><i class="fa-solid fa-trash"></i></button>`;
+                    taskList.appendChild(li);
+                });
+            }
+            document.getElementById('task-counter').textContent = `${pending} pendentes`;
+            document.getElementById('dash-task-count').textContent = pending;
+        }
+
+        // Acessibilidade e TTS
+        function applyPrefs() {
+            const html = document.documentElement;
+            html.setAttribute('data-theme', state.prefs.theme);
+            html.setAttribute('data-text-size', state.prefs.textSize);
+            html.setAttribute('data-font', state.prefs.font);
+            html.setAttribute('data-spacing', state.prefs.spacing);
+            
+            document.querySelectorAll('.pref-btn').forEach(btn => { btn.style.borderColor = 'var(--color-border)'; btn.style.borderWidth = '1px'; });
+            const highlight = (sel, val) => {
+                document.querySelectorAll(sel).forEach(b => {
+                    if(b.getAttribute('onclick').includes(val)) { b.style.borderColor = 'var(--color-primary)'; b.style.borderWidth = '2px'; }
+                });
+            };
+            highlight('.theme-btn', state.prefs.theme); highlight('.text-size-btn', state.prefs.textSize); highlight('.font-btn', state.prefs.font);
+        }
+
+        function setPref(key, value) { state.prefs[key] = value; saveState('prefs', state.prefs); applyPrefs(); }
+        function resetA11y() { state.prefs = { theme: 'light', textSize: 'normal', font: 'standard', spacing: 'normal', motion: 'normal' }; saveState('prefs', state.prefs); applyPrefs(); }
+
+        let modalOpen = false;
+        function toggleA11yPanel() {
+            const modal = document.getElementById('a11y-modal');
+            const panel = document.getElementById('a11y-panel');
+            modalOpen = !modalOpen;
+            if (modalOpen) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                panel.classList.remove('translate-x-full');
+            } else {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                panel.classList.add('translate-x-full');
+            }
+        }
+
+        let synth = window.speechSynthesis, utterance = null;
+        function readAloud() {
+            if (synth.speaking && !synth.paused) return;
+            if (synth.paused) { synth.resume(); return; }
+            utterance = new SpeechSynthesisUtterance(document.getElementById('study-content').innerText);
+            utterance.lang = 'pt-BR'; synth.speak(utterance);
+        }
+        function pauseSpeech() { if (synth.speaking && !synth.paused) synth.pause(); }
+        function stopSpeech() { synth.cancel(); }
+
+        // ==========================================
+        // INIT
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            applyPrefs();
+            updateProfileUI();
+            navTo('dashboard'); 
+            renderTasks();
+            
+            document.getElementById('a11y-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('a11y-modal')) toggleA11yPanel();
+            });
+            window.addEventListener('beforeunload', stopSpeech);
+        });
+    </script>
+</body>
+</html>
